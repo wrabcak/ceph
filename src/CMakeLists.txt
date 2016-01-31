@@ -528,6 +528,8 @@ if(${WITH_LTTNG})
   target_link_libraries(global lttng-ust dl)
 endif(${WITH_LTTNG})
 
+add_subdirectory(lua)
+
 # rados object classes
 add_subdirectory(cls)
 
