@@ -3989,6 +3989,7 @@ int ReplicatedPG::do_replica_safe_read(
 
   switch (op.op) {
 
++++++
 
   default:
     result = -EOPNOTSUPP;
@@ -4072,6 +4073,7 @@ int ReplicatedPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
       
       // --- READS ---
 
+----->
     case CEPH_OSD_OP_SYNC_READ:
       if (pool.info.require_rollback()) {
 	result = -EOPNOTSUPP;
@@ -4291,6 +4293,7 @@ int ReplicatedPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
       delta_stats.num_rd++;
       break;
 
+-----<
     case CEPH_OSD_OP_CALL:
       {
 	string cname, mname;
@@ -4506,6 +4509,7 @@ int ReplicatedPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
       }
       break;
 
+----->
     case CEPH_OSD_OP_GETXATTR:
       ++num_read;
       {
@@ -4656,6 +4660,7 @@ int ReplicatedPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
 	break;
       }
 
+-----<
     case CEPH_OSD_OP_LIST_SNAPS:
       ++ctx->num_read;
       {
@@ -5439,6 +5444,7 @@ int ReplicatedPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
       result = do_tmap2omap(ctx, op.tmap2omap.flags);
       break;
 
+----->
       // OMAP Read ops
     case CEPH_OSD_OP_OMAPGETKEYS:
       ++num_read;
@@ -5628,6 +5634,7 @@ int ReplicatedPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
 	}
       }
       break;
+-----<
 
       // OMAP Write ops
     case CEPH_OSD_OP_OMAPSETVALS:
