@@ -707,6 +707,7 @@ bool Replayer::stop_image_replayer(unique_ptr<ImageReplayer<> > &image_replayer)
   dout(20) << "global_image_id=" << image_replayer->get_global_image_id()
            << dendl;
 
+  // TODO: check how long it is stopping and alert if it is too long.
   if (image_replayer->is_stopped()) {
     m_image_deleter->cancel_waiter(image_replayer->get_local_image_name());
     if (!m_stopping.read()) {
@@ -718,9 +719,7 @@ bool Replayer::stop_image_replayer(unique_ptr<ImageReplayer<> > &image_replayer)
         image_replayer->get_global_image_id());
     }
     return true;
-  }
-
-  if (image_replayer->is_running()) {
+  } else {
     if (!m_stopping.read()) {
       dout(20) << "scheduling delete after image replayer stopped" << dendl;
     }
@@ -736,8 +735,6 @@ bool Replayer::stop_image_replayer(unique_ptr<ImageReplayer<> > &image_replayer)
         }
     );
     image_replayer->stop(ctx);
-  } else {
-    // TODO: checkhow long it is stopping and alert if it is too long.
   }
 
   return false;
