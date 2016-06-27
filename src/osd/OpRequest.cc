@@ -28,7 +28,7 @@ OpRequest::OpRequest(Message *req, OpTracker *tracker) :
   rmw_flags(0), request(req),
   hit_flag_points(0), latest_flag_point(0),
   send_map_update(false), sent_epoch(0),
-  hitset_inserted(false) {
+  hitset_inserted(false), on_class_whitelist_flag(false) {
   if (req->get_priority() < tracker->cct->_conf->osd_client_op_priority) {
     // don't warn as quickly for low priority ops
     warn_interval_multiplier = tracker->cct->_conf->osd_recovery_op_warn_multiple;
@@ -114,6 +114,7 @@ bool OpRequest::need_skip_handle_cache() {
 bool OpRequest::need_skip_promote() {
   return check_rmw(CEPH_OSD_RMW_FLAG_SKIP_PROMOTE);
 }
+bool OpRequest::on_class_whitelist() { return on_class_whitelist_flag; }
 
 void OpRequest::set_rmw_flags(int flags) {
 #ifdef WITH_LTTNG
@@ -134,6 +135,7 @@ void OpRequest::set_cache() { set_rmw_flags(CEPH_OSD_RMW_FLAG_CACHE); }
 void OpRequest::set_promote() { set_rmw_flags(CEPH_OSD_RMW_FLAG_FORCE_PROMOTE); }
 void OpRequest::set_skip_handle_cache() { set_rmw_flags(CEPH_OSD_RMW_FLAG_SKIP_HANDLE_CACHE); }
 void OpRequest::set_skip_promote() { set_rmw_flags(CEPH_OSD_RMW_FLAG_SKIP_PROMOTE); }
+void OpRequest::set_class_whitelist() { on_class_whitelist_flag = true; }
 
 void OpRequest::mark_flag_point(uint8_t flag, const string& s) {
 #ifdef WITH_LTTNG

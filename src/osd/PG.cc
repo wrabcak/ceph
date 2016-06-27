@@ -1870,7 +1870,8 @@ bool PG::op_has_sufficient_caps(OpRequestRef& op)
 			     op->need_read_cap(),
 			     op->need_write_cap(),
 			     op->need_class_read_cap(),
-			     op->need_class_write_cap());
+			     op->need_class_write_cap(),
+                             op->on_class_whitelist());
 
   dout(20) << "op_has_sufficient_caps pool=" << pool.id << " (" << pool.name
 		   << " " << req->get_object_locator().nspace

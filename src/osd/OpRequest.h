@@ -65,6 +65,7 @@ struct OpRequest : public TrackedOp {
   bool need_write_cap();
   bool need_class_read_cap();
   bool need_class_write_cap();
+  bool on_class_whitelist(); // grant x cap implicitly
   bool need_promote();
   bool need_skip_handle_cache();
   bool need_skip_promote();
@@ -73,6 +74,7 @@ struct OpRequest : public TrackedOp {
   void set_cache();
   void set_class_read();
   void set_class_write();
+  void set_class_whitelist();
   void set_pg_op();
   void set_promote();
   void set_skip_handle_cache();
@@ -110,6 +112,7 @@ public:
   bool send_map_update;
   epoch_t sent_epoch;
   bool hitset_inserted;
+  bool on_class_whitelist_flag;
   Message *get_req() const { return request; }
   bool been_queued_for_pg() { return hit_flag_points & flag_queued_for_pg; }
   bool been_reached_pg() { return hit_flag_points & flag_reached_pg; }

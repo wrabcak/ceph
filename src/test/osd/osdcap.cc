@@ -270,6 +270,11 @@ TEST(OSDCap, BasicRW) {
   ASSERT_FALSE(cap.is_capable("bar", "", 0, "foo", false, true, false, true));
   ASSERT_FALSE(cap.is_capable("bar", "", 0, "foo", true, false, true, false));
   ASSERT_FALSE(cap.is_capable("bar", "", 0, "foo", true, true, true, true));
+
+  // class whitelist flag works
+  ASSERT_TRUE(cap.is_capable("bar", "", 0, "foo", false, true, false, true, true));
+  ASSERT_TRUE(cap.is_capable("bar", "", 0, "foo", true, false, true, false, true));
+  ASSERT_TRUE(cap.is_capable("bar", "", 0, "foo", true, true, true, true, true));
 }
 
 TEST(OSDCap, BasicRX) {
