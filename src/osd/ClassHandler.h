@@ -101,11 +101,15 @@ private:
   Mutex mutex;
   map<string, ClassData> classes;
 
-  ClassData *_get_class(const string& cname);
+  ClassData *_get_class(const string& cname, bool check_allowed);
   int _load_class(ClassData *cls);
 
+  // list of class names that may be loaded
+  std::unordered_set<std::string> load_allowed_;
+  bool load_allowed_all_;
+
 public:
-  explicit ClassHandler(CephContext *cct_) : cct(cct_), mutex("ClassHandler") {}
+  explicit ClassHandler(CephContext *cct_);
   
   int open_all_classes();
 

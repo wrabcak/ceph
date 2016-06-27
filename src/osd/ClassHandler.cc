@@ -25,11 +25,26 @@
 #define CLS_PREFIX "libcls_"
 #define CLS_SUFFIX ".so"
 
+ClassHandler::ClassHandler(CephContext *cct_) :
+  cct(cct_), mutex("ClassHandler")
+{
+  // create an index of the allowed class names
+  std::istringstream ss(cct->_conf->osd_class_load_list);
+  std::unordered_set<std::string> allowed{
+    istream_iterator<std::string>{ss},
+    istream_iterator<std::string>{}};
+  load_allowed_.swap(allowed);
+  load_allowed_all_ = load_allowed_.find("*") != load_allowed_.end();
+  if (load_allowed_all_)
+    load_allowed_.clear();
+}
 
 int ClassHandler::open_class(const string& cname, ClassData **pcls)
 {
   Mutex::Locker lock(mutex);
-  ClassData *cls = _get_class(cname);
+  ClassData *cls = _get_class(cname, true);
+  if (!cls)
+    return -EPERM;
   if (cls->status != ClassData::CLASS_OPEN) {
     int r = _load_class(cls);
     if (r)
@@ -80,7 +95,8 @@ void ClassHandler::shutdown()
   classes.clear();
 }
 
-ClassHandler::ClassData *ClassHandler::_get_class(const string& cname)
+ClassHandler::ClassData *ClassHandler::_get_class(const string& cname,
+    bool check_allowed)
 {
   ClassData *cls;
   map<string, ClassData>::iterator iter = classes.find(cname);
@@ -88,6 +104,13 @@ ClassHandler::ClassData *ClassHandler::_get_class(const string& cname)
   if (iter != classes.end()) {
     cls = &iter->second;
   } else {
+    // the class must be in the allowed list before loading. note that classes
+    // loaded to satisfy a dependency are always allowed.
+    if (check_allowed && !load_allowed_all_ &&
+        load_allowed_.find(cname) == load_allowed_.end()) {
+      dout(0) << "_get_class not permitted for class " << cname << dendl;
+      return NULL;
+    }
     cls = &classes[cname];
     dout(10) << "_get_class adding new class name " << cname << " " << cls << dendl;
     cls->name = cname;
@@ -134,7 +157,7 @@ int ClassHandler::_load_class(ClassData *cls)
       while (deps) {
 	if (!deps->name)
 	  break;
-	ClassData *cls_dep = _get_class(deps->name);
+	ClassData *cls_dep = _get_class(deps->name, false);
 	cls->dependencies.insert(cls_dep);
 	if (cls_dep->status != ClassData::CLASS_OPEN)
 	  cls->missing_dependencies.insert(cls_dep);
@@ -175,7 +198,7 @@ ClassHandler::ClassData *ClassHandler::register_class(const char *cname)
 {
   assert(mutex.is_locked());
 
-  ClassData *cls = _get_class(cname);
+  ClassData *cls = _get_class(cname, false);
   dout(10) << "register_class " << cname << " status " << cls->status << dendl;
 
   if (cls->status != ClassData::CLASS_INITIALIZING) {
