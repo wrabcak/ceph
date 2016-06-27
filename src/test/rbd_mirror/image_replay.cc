@@ -187,7 +187,8 @@ int main(int argc, const char **argv)
   threads = new rbd::mirror::Threads(reinterpret_cast<CephContext*>(
     local->cct()));
 
-  image_deleter.reset(new rbd::mirror::ImageDeleter(local, threads->timer,
+  image_deleter.reset(new rbd::mirror::ImageDeleter(local, threads->work_queue,
+                                                    threads->timer,
                                                     &threads->timer_lock));
 
   replayer = new rbd::mirror::ImageReplayer<>(threads, image_deleter, local,
