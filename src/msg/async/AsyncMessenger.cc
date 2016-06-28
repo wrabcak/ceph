@@ -873,7 +873,3 @@ int AsyncMessenger::reap_dead()
 
   return num;
 }
-
-void AsyncMessenger::release_worker(EventCenter* c) {
-  pool->release_worker(c);
-}
